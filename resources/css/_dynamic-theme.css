@@ -1,0 +1,47 @@
+/* Reusable UI styles for responsive + dynamic look */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+
+.dark .glass-panel {
+  background: rgba(17, 24, 39, 0.55);
+  border: 1px solid rgba(55, 65, 81, 0.7);
+}
+
+.card-dynamic {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(226,232,240,0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.dark .card-dynamic {
+  background: rgba(17,24,39,0.55);
+  border: 1px solid rgba(55,65,81,0.75);
+}
+
+
+
+
+.section-badge {
+
+  @apply inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.3em];
+}
+
+.btn-dynamic {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition;
+}
+
+.btn-primary-dynamic {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200/30;
+}
+
+.btn-secondary-dynamic {
+  @apply bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700;
+}
+

@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Tugas;
+use App\Models\Mapel;
+use App\Models\PengumpulanTugas;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class TugasController extends Controller
+{
+    public function viewJawaban($tugasId)
+    {
+        $tugas = Tugas::with('mapel')->findOrFail($tugasId);
+
+        // hanya siswa
+        if (auth()->user()->role !== 'siswa') {
+            abort(403);
+        }
+
+        // pastikan tugas milik kelas siswa
+        $kelasId = auth()->user()->kelas_id;
+        $isValidKelas = $tugas->mapel && $tugas->mapel->kelas && $tugas->mapel->kelas->kelas_id == $kelasId;
+        if (!$isValidKelas) {
+            abort(403);
+        }
+
+        $pengumpulan = PengumpulanTugas::where('tugas_id', $tugasId)
+            ->where('siswa_id', auth()->id())
+            ->first();
+
+        if (!$pengumpulan || !$pengumpulan->file_jawaban) {
+            abort(404);
+        }
+
+        $extension = strtolower(pathinfo($pengumpulan->file_jawaban, PATHINFO_EXTENSION));
+
+        return view('siswa.tugas.view_jawaban', [
+            'tugas' => $tugas,
+            'pengumpulan' => $pengumpulan,
+            'extension' => $extension,
+        ]);
+    }
+
+    public function index()
+    {
+        // Siswa hanya melihat tugas dari mapel di kelasnya
+        if (auth()->user()->role === 'siswa') {
+            $kelasId = auth()->user()->kelas_id;
+            $tugas = Tugas::whereHas('mapel.kelas', function ($q) use ($kelasId) {
+                $q->where('kelas_id', $kelasId);
+            })->with(['mapel', 'pengumpulan' => function ($q) {
+                $q->where('siswa_id', auth()->id());
+            }])->latest()->get();
+            return view('siswa.tugas.index', compact('tugas'));
+        }
+
+        // Guru melihat tugas yang mereka buat
+        $tugas = Tugas::whereHas('mapel', function ($q) {
+            $q->where('guru_id', auth()->id());
+        })->with(['mapel', 'pengumpulan'])->latest()->get();
+
+        return view('guru.tugas.index', compact('tugas'));
+    }
+
+    public function create()
+    {
+        $mapels = Mapel::where('guru_id', auth()->id())->get();
+        return view('guru.tugas.create', compact('mapels'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'judul_tugas' => 'required|string|max:255',
+            'deskripsi'   => 'nullable|string',
+            'mapel_id'    => 'required|exists:mapels,id',
+            'deadline'    => 'required|date',
+            'file_tugas'  => 'nullable|file|mimes:pdf,doc,docx,zip|max:102400',
+        ]);
+
+        $path = $request->hasFile('file_tugas') ? $request->file('file_tugas')->store('tugas', 'public') : null;
+
+        Tugas::create([
+            'judul_tugas' => $request->judul_tugas,
+            'deskripsi'   => $request->deskripsi,
+            'mapel_id'    => $request->mapel_id,
+            'deadline'    => $request->deadline,
+            'file_tugas'  => $path,
+        ]);
+
+        return redirect()->route('guru.tugas.index')->with('success', 'Tugas berhasil dibuat.');
+    }
+
+    public function show($id)
+    {
+        $tugas = Tugas::with('pengumpulan.siswa')->findOrFail($id);
+
+        // Siswa: lihat detail tugas milik kelasnya
+        if (auth()->user()->role === 'siswa') {
+            $pengumpulan = $tugas->pengumpulan->where('siswa_id', auth()->id())->first();
+            return view('siswa.tugas.show', compact('tugas', 'pengumpulan'));
+        }
+
+        // Guru: validasi kepemilikan tugas
+        if ($tugas->mapel->guru_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('guru.tugas.show', compact('tugas'));
+    }
+
+    public function nilai(Request $request, $tugasId, $pengumpulanId)
+    {
+        $request->validate(['nilai' => 'required|numeric|min:0|max:100']);
+
+        $pengumpulan = PengumpulanTugas::findOrFail($pengumpulanId);
+        $pengumpulan->update(['nilai' => $request->nilai]);
+
+        return back()->with('success', 'Nilai berhasil disimpan.');
+    }
+
+    public function indexSiswa()
+    {
+        $kelasId = auth()->user()->kelas_id;
+        $tugas = Tugas::whereHas('mapel.kelas', function ($q) use ($kelasId) {
+            $q->where('kelas_id', $kelasId);
+        })->with(['mapel.guru', 'pengumpulan' => function ($q) {
+            $q->where('siswa_id', auth()->id());
+        }])->latest()->get();
+        return view('siswa.tugas.index', compact('tugas'));
+    }
+
+    public function kumpul(Request $request, $tugasId)
+    {
+        $request->validate([
+            'file_jawaban' => 'required|file|mimes:pdf,doc,docx,zip|max:102400',
+        ]);
+
+        $path = $request->file('file_jawaban')->store('jawaban', 'public');
+
+        PengumpulanTugas::updateOrCreate(
+            ['tugas_id' => $tugasId, 'siswa_id' => auth()->id()],
+            ['file_jawaban' => $path]
+        );
+
+        return back()->with('success', 'Tugas berhasil dikumpulkan.');
+    }
+}
+
