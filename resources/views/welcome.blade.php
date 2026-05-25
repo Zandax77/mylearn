@@ -141,6 +141,25 @@
                     padding-top: 120px;
                 }
             }
+
+            @keyframes gentle-float {
+                0%, 100% {
+                    transform: translateY(0) rotate(0deg);
+                }
+                50% {
+                    transform: translateY(-5px) rotate(2deg);
+                }
+            }
+
+            .animated-logo {
+                animation: gentle-float 3s ease-in-out infinite;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .animated-logo:hover {
+                transform: scale(1.08) translateY(-3px) rotate(-1deg);
+                box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.25);
+            }
         </style>
     </head>
 
@@ -148,15 +167,15 @@
         <!-- Minimalist Navigation -->
         <header class="fixed top-0 w-full z-50 px-4 py-4 sm:px-6">
             <nav class="mx-auto max-w-6xl glass-card rounded-2xl px-4 py-3 sm:px-6 flex items-center justify-between header-nav">
-                <a href="/" class="flex items-center gap-2 sm:gap-3 group">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary flex items-center justify-center overflow-hidden shrink-0">
+                <a href="/" class="flex items-center gap-2 sm:gap-4 group">
+                    <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-md flex items-center justify-center overflow-hidden shrink-0 animated-logo">
                         @if($school->logo)
                             <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo" class="w-full h-full object-cover">
                         @else
-                            <img src="{{ asset('images/school_logo_placeholder.svg') }}" alt="School Logo" class="w-full h-full p-2">
+                            <img src="{{ asset('images/school_logo_placeholder.svg') }}" alt="School Logo" class="w-full h-full p-2.5">
                         @endif
                     </div>
-                    <span class="text-base sm:text-lg font-semibold tracking-tight font-outfit school-name">{{ $school->name }}</span>
+                    <span class="text-lg sm:text-xl font-bold tracking-tight font-outfit school-name transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">{{ $school->name }}</span>
                 </a>
 
                 <div class="flex items-center gap-4">
@@ -318,15 +337,15 @@
         <!-- Elegant Footer -->
         <footer class="mt-auto py-12 px-6">
             <div class="mx-auto max-w-6xl border-t border-gray-200 dark:border-gray-800 pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center justify-center overflow-hidden shrink-0 animated-logo">
                         @if($school->logo)
                             <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo" class="w-full h-full object-cover">
                         @else
-                            <img src="{{ asset('images/school_logo_placeholder.svg') }}" alt="School Logo" class="w-full h-full p-1.5">
+                            <img src="{{ asset('images/school_logo_placeholder.svg') }}" alt="School Logo" class="w-full h-full p-2">
                         @endif
                     </div>
-                    <span class="font-semibold font-outfit">{{ $school->name }}</span>
+                    <span class="text-base sm:text-lg font-bold font-outfit">{{ $school->name }}</span>
                 </div>
                 <p class="text-sm opacity-50">&copy; {{ date('Y') }} {{ $school->name }}. Semua hak dilindungi.</p>
                 <div class="flex gap-6 text-sm opacity-50">

@@ -31,11 +31,11 @@ class ImportController extends Controller
 
         // Sanitize header (remove BOM if present)
         $header[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header[0]);
-        $expectedHeader = ['name', 'email', 'password', 'role', 'nama_kelas'];
+        $expectedHeader = ['name', 'email', 'role', 'nama_kelas'];
         
         if ($header !== $expectedHeader) {
             fclose($fileHandle);
-            return back()->with('error', 'Format header CSV tidak sesuai! Harus: name, email, password, role, nama_kelas');
+            return back()->with('error', 'Format header CSV tidak sesuai! Harus: name, email, role, nama_kelas');
         }
 
         $imported = 0;
@@ -45,9 +45,9 @@ class ImportController extends Controller
         try {
             while (($row = fgetcsv($fileHandle)) !== false) {
                 if (array_filter($row) === []) continue; // Skip empty rows
-                if (count($row) != 5) continue;
+                if (count($row) != 4) continue;
                 
-                list($name, $email, $password, $role, $nama_kelas) = $row;
+                list($name, $email, $role, $nama_kelas) = $row;
                 $email = trim($email);
                 
                 $kelas_id = null;
@@ -64,9 +64,10 @@ class ImportController extends Controller
                 User::create([
                     'name' => trim($name),
                     'email' => $email,
-                    'password' => Hash::make(trim($password)),
+                    'password' => Hash::make('password'),
                     'role' => strtolower(trim($role)),
                     'kelas_id' => $kelas_id,
+                    'is_active' => true,
                 ]);
                 $imported++;
             }
@@ -146,9 +147,9 @@ class ImportController extends Controller
         
         $callback = function() {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['name', 'email', 'password', 'role', 'nama_kelas']);
-            fputcsv($file, ['Siti Guru', 'guru.siti@sekolah.com', 'password123', 'guru', '']);
-            fputcsv($file, ['Budi Siswa', 'siswa.budi@sekolah.com', 'password123', 'siswa', '10 IPA 1']);
+            fputcsv($file, ['name', 'email', 'role', 'nama_kelas']);
+            fputcsv($file, ['Siti Guru', 'guru.siti@sekolah.com', 'guru', '']);
+            fputcsv($file, ['Budi Siswa', 'siswa.budi@sekolah.com', 'siswa', '10 IPA 1']);
             fclose($file);
         };
         

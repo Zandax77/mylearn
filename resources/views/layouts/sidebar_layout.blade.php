@@ -22,22 +22,41 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+
+        @keyframes gentle-float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-4px) rotate(1.5deg);
+            }
+        }
+
+        .animated-logo {
+            animation: gentle-float 3s ease-in-out infinite;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animated-logo:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.2);
+        }
     </style>
 
     <!-- DESKTOP SIDEBAR (COMPACT) -->
     <aside class="sidebar-desktop flex-col w-72 shrink-0 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 relative z-30 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div class="flex items-center h-20 px-8 border-b border-gray-50 dark:border-gray-700 shrink-0">
-            <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 group">
-                <div class="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none">
+        <div class="flex flex-col items-center justify-center h-48 px-4 py-5 border-b border-gray-50 dark:border-gray-700 shrink-0 gap-2.5">
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-3 group">
+                <div class="w-32 h-32 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-xl flex items-center justify-center overflow-hidden shrink-0 animated-logo">
                     @if($school->logo)
-                        <img src="{{ asset('storage/' . $school->logo) }}" class="h-5 w-auto">
+                        <img src="{{ asset('storage/' . $school->logo) }}" class="w-full h-full object-contain p-1.5">
                     @else
-                        <x-application-logo class="h-5 w-auto fill-current text-white" />
+                        <x-application-logo class="h-16 w-auto fill-current text-indigo-600 dark:text-indigo-400" />
                     @endif
                 </div>
-                <div class="flex flex-col min-w-0">
-                    <span class="text-[11px] font-black text-gray-900 dark:text-white uppercase truncate tracking-tight">{{ $school->name }}</span>
-                    <span class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-0.5">LMS Hub</span>
+                <div class="flex flex-col items-center min-w-0 w-full">
+                    <span class="text-[10px] font-black text-gray-900 dark:text-white uppercase truncate tracking-tight text-center w-full">{{ $school->name }}</span>
+                    <span class="text-[7px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mt-0.5 font-mono">LMS Hub</span>
                 </div>
             </a>
         </div>

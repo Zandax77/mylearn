@@ -38,11 +38,12 @@
                         </div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
                             Format CSV harus memiliki baris pertama (header) persis seperti berikut:<br>
-                            <code class="block mt-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-pink-500 font-mono text-sm border border-gray-200 dark:border-gray-600">name,email,password,role,nama_kelas</code>
+                            <code class="block mt-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-pink-500 font-mono text-sm border border-gray-200 dark:border-gray-600">name,email,role,nama_kelas</code>
                         </p>
                         <ul class="text-xs text-gray-500 dark:text-gray-400 mb-4 list-disc list-inside">
                             <li>Role harus diisi dengan "guru" atau "siswa".</li>
-                            <li>Password akan dienkripsi secara otomatis oleh sistem.</li>
+                            <li>Akun guru dan siswa otomatis langsung aktif.</li>
+                            <li>Password default diatur secara otomatis ke <strong class="text-indigo-600 dark:text-indigo-400 font-semibold font-mono">password</strong> dan dapat diubah kemudian secara mandiri oleh pemilik akun.</li>
                             <li>Kolom nama_kelas opsional, khusus untuk siswa. Jika kelas belum ada, sistem akan membuatnya otomatis.</li>
                         </ul>
                         <div class="mb-6">
