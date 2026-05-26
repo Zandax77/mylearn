@@ -25,6 +25,10 @@
                     <a href="{{ route('guru.ujians.soals.create', $ujian->id) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded transition shadow">
                         + Tambah Soal
                     </a>
+                @else
+                    <a href="{{ route('guru.bank_soal.index', $ujian->mapel_id) }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded transition shadow">
+                        Kelola Bank Soal & Unggah
+                    </a>
                 @endif
             </div>
 

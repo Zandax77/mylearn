@@ -29,16 +29,23 @@ class MateriController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
+            'tipe' => 'required|in:pdf,youtube',
             'mapel_id' => 'required|exists:mapels,id',
             'bab_id' => 'required|exists:babs,id',
             'urutan' => 'required|integer|min:1',
-            'file' => 'required|file|mimes:pdf,ppt,pptx,doc,docx,zip|max:10240',
+            'file' => 'required_if:tipe,pdf|file|mimes:pdf|max:10240',
+            'youtube_url' => 'required_if:tipe,youtube|url',
         ]);
 
-        $path = $request->file('file')->store('materis', 'public');
+        $path = null;
+        if ($request->tipe === 'pdf' && $request->hasFile('file')) {
+            $path = $request->file('file')->store('materis', 'public');
+        }
 
         Materi::create([
             'judul' => $request->judul,
+            'tipe' => $request->tipe,
+            'youtube_url' => $request->youtube_url,
             'mapel_id' => $request->mapel_id,
             'bab_id' => $request->bab_id,
             'urutan' => $request->urutan,
@@ -65,20 +72,6 @@ class MateriController extends Controller
         return redirect()->route('guru.materi.index')->with('success', 'Materi berhasil dihapus.');
     }
 
-    public function download($id)
-    {
-        $materi = Materi::findOrFail($id);
-        
-        if (auth()->user()->role === 'siswa') {
-            \App\Models\ProgresMateri::firstOrCreate([
-                'siswa_id' => auth()->id(),
-                'materi_id' => $materi->id,
-            ]);
-        }
-
-        return Storage::disk('public')->download($materi->file);
-    }
-
     public function viewMateri($id)
     {
         $materi = Materi::findOrFail($id);
@@ -90,7 +83,7 @@ class MateriController extends Controller
             ]);
         }
 
-        $extension = pathinfo($materi->file, PATHINFO_EXTENSION);
+        $extension = $materi->file ? pathinfo($materi->file, PATHINFO_EXTENSION) : null;
         return view('siswa.materi.view', compact('materi', 'extension'));
     }
 

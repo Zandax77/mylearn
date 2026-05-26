@@ -23,16 +23,61 @@
                                     {{ $index + 1 }}. {{ $soal->pertanyaan }}
                                 </h3>
                                 
-                                <div class="space-y-3">
-                                    @foreach(['a', 'b', 'c', 'd'] as $key)
-                                        <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                                            <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
-                                            <span class="ml-3 text-gray-700 dark:text-gray-300">
-                                                <span class="font-bold mr-1 uppercase">{{ $key }}.</span> {{ $soal->{'opsi_' . $key} }}
-                                            </span>
-                                        </label>
-                                    @endforeach
-                                </div>
+                                @if($ujian->tipe === 'kuis' || !isset($soal->tipe_soal) || $soal->tipe_soal === 'pg')
+                                    {{-- Old Soal Style or BankSoal PG Style --}}
+                                    <div class="space-y-3">
+                                        @if(isset($soal->tipe_soal) && $soal->tipe_soal === 'pg')
+                                            @foreach($soal->opsi as $key => $opsi)
+                                                <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                    <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $opsi }}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                                    <span class="ml-3 text-gray-700 dark:text-gray-300">{{ $opsi }}</span>
+                                                </label>
+                                            @endforeach
+                                        @else
+                                            @foreach(['a', 'b', 'c', 'd'] as $key)
+                                                <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                    <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                                    <span class="ml-3 text-gray-700 dark:text-gray-300">
+                                                        <span class="font-bold mr-1 uppercase">{{ $key }}.</span> {{ $soal->{'opsi_' . $key} }}
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                @elseif($soal->tipe_soal === 'bs')
+                                    <div class="space-y-3">
+                                        @foreach(['Benar', 'Salah'] as $opsi)
+                                            <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $opsi }}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                                <span class="ml-3 text-gray-700 dark:text-gray-300 font-bold">{{ $opsi }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @elseif($soal->tipe_soal === 'jodoh')
+                                    <div class="space-y-4">
+                                        <p class="text-sm text-gray-500 mb-2">Pilih pasangan yang tepat untuk setiap item di bawah ini:</p>
+                                        @php
+                                            // The options are key-value pairs representing the correct matches in DB
+                                            // But for the view, we need to shuffle the values to make it a dropdown
+                                            $keys = array_keys($soal->opsi);
+                                            $values = array_values($soal->opsi);
+                                            shuffle($values);
+                                        @endphp
+                                        @foreach($keys as $key)
+                                            <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/30 rounded border border-gray-100 dark:border-gray-600">
+                                                <div class="w-1/2 font-semibold text-gray-800 dark:text-gray-200">{{ $key }}</div>
+                                                <div class="w-1/2">
+                                                    <select name="jawaban[{{ $soal->id }}][{{ $key }}]" class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white" required>
+                                                        <option value="">-- Pilih Pasangan --</option>
+                                                        @foreach($values as $val)
+                                                            <option value="{{ $val }}">{{ $val }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
 

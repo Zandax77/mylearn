@@ -26,6 +26,8 @@ class UjianController extends Controller
             'bab_id' => 'nullable|exists:babs,id',
             'jumlah_soal_tampil' => 'required|integer|min:1',
             'passing_grade' => 'required|integer|min:0|max:100',
+            'mulai_pada' => 'nullable|date',
+            'selesai_pada' => 'nullable|date|after_or_equal:mulai_pada',
         ]);
 
         $ujian = Ujian::create($request->all());
@@ -60,6 +62,8 @@ class UjianController extends Controller
             'tipe' => 'required|in:kuis,uts,uas',
             'jumlah_soal_tampil' => 'required|integer|min:1',
             'passing_grade' => 'required|integer|min:0|max:100',
+            'mulai_pada' => 'nullable|date',
+            'selesai_pada' => 'nullable|date|after_or_equal:mulai_pada',
         ]);
 
         $ujian->update($request->all());
@@ -77,4 +81,13 @@ class UjianController extends Controller
         
         return redirect()->route('guru.babs.index', $mapel_id)->with('success', 'Ujian beserta soalnya berhasil dihapus.');
     }
+    public function index()
+    {
+        $ujians = Ujian::whereHas('mapel', function($q) {
+            $q->where('guru_id', auth()->id());
+        })->with('mapel')->get();
+
+        return view('guru.ujian.index', compact('ujians'));
+    }
+
 }

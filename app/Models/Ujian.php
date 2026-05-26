@@ -6,7 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ujian extends Model
 {
-    protected $fillable = ['judul', 'tipe', 'jumlah_soal_tampil', 'mapel_id', 'bab_id', 'passing_grade', 'durasi_menit'];
+    protected $fillable = [
+        'judul',
+        'tipe',
+        'jumlah_soal_tampil',
+        'mapel_id',
+        'bab_id',
+        'passing_grade',
+        'durasi_menit',
+        'mulai_pada',
+        'selesai_pada'
+    ];
+
+    protected $casts = [
+        'mulai_pada' => 'datetime',
+        'selesai_pada' => 'datetime',
+    ];
 
     public function mapel()
     {

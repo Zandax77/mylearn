@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ujian;
 use App\Models\Soal;
+use App\Models\BankSoal;
 use App\Models\HasilUjian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -14,6 +15,14 @@ class SiswaUjianController extends Controller
     {
         $ujian = Ujian::with('soals')->findOrFail($ujian_id);
         $siswaId = auth()->id();
+
+        $now = now();
+        if ($ujian->mulai_pada && $now->lt($ujian->mulai_pada)) {
+            return back()->with('error', 'Ujian belum dibuka. Ujian dijadwalkan mulai pada ' . $ujian->mulai_pada->translatedFormat('d F Y H:i'));
+        }
+        if ($ujian->selesai_pada && $now->gt($ujian->selesai_pada)) {
+            return back()->with('error', 'Waktu ujian telah berakhir. Ujian ditutup pada ' . $ujian->selesai_pada->translatedFormat('d F Y H:i'));
+        }
 
         // Check if student has already passed
         $alreadyPassed = HasilUjian::where('siswa_id', $siswaId)
@@ -28,17 +37,31 @@ class SiswaUjianController extends Controller
         $sessionKey = "ujian_{$ujian->id}_questions";
         if (Session::has($sessionKey)) {
             $soalIds = Session::get($sessionKey);
-            $soals = Soal::whereIn('id', $soalIds)->get();
+            if ($ujian->tipe === 'kuis') {
+                $soals = Soal::whereIn('id', $soalIds)->get();
+            } else {
+                $soals = BankSoal::whereIn('id', $soalIds)->get();
+            }
         } else {
-            $soals = $ujian->soals()->inRandomOrder()->limit($jumlahSoal)->get();
+            if ($ujian->tipe === 'kuis') {
+                $soals = $ujian->soals()->inRandomOrder()->limit($jumlahSoal)->get();
+            } else {
+                // UAS/UTS: Pull from BankSoal for the entire mapel
+                $query = BankSoal::where('mapel_id', $ujian->mapel_id);
+                if ($ujian->bab_id) {
+                    $query->where('bab_id', $ujian->bab_id);
+                }
+                $soals = $query->inRandomOrder()->limit($jumlahSoal)->get();
+            }
+
             if ($soals->count() < $jumlahSoal) {
-                return back()->with('error', 'Bank soal tidak mencukupi untuk memulai kuis. Hubungi guru Anda.');
+                return back()->with('error', 'Bank soal tidak mencukupi untuk memulai ujian. Hubungi guru Anda.');
             }
             Session::put($sessionKey, $soals->pluck('id')->toArray());
             Session::put("ujian_{$ujian->id}_start", now());
         }
 
-        $durasi = $soals->count(); // 1 minute per question
+        $durasi = $ujian->durasi_menit ?? $soals->count(); 
         
         return view('siswa.ujian.show', compact('ujian', 'soals', 'durasi', 'alreadyPassed'));
     }
@@ -52,18 +75,49 @@ class SiswaUjianController extends Controller
             return redirect()->route('siswa.mapel.show', $ujian->mapel_id)->with('error', 'Sesi ujian berakhir atau tidak valid.');
         }
 
-        $soals = Soal::whereIn('id', $soalIds)->get();
         $jawabanSiswa = $request->input('jawaban', []);
-        
         $jumlahBenar = 0;
-        foreach ($soals as $soal) {
-            if (isset($jawabanSiswa[$soal->id]) && $jawabanSiswa[$soal->id] == $soal->jawaban_benar) {
-                $jumlahBenar++;
+
+        if ($ujian->tipe === 'kuis') {
+            $soals = Soal::whereIn('id', $soalIds)->get();
+            foreach ($soals as $soal) {
+                if (isset($jawabanSiswa[$soal->id]) && $jawabanSiswa[$soal->id] == $soal->jawaban_benar) {
+                    $jumlahBenar++;
+                }
+            }
+        } else {
+            $soals = BankSoal::whereIn('id', $soalIds)->get();
+            foreach ($soals as $soal) {
+                if (!isset($jawabanSiswa[$soal->id])) continue;
+                $jwbn = $jawabanSiswa[$soal->id];
+                
+                if ($soal->tipe_soal === 'pg' || $soal->tipe_soal === 'bs') {
+                    $benar = $soal->jawaban_benar[0] ?? null;
+                    if ($jwbn == $benar) {
+                        $jumlahBenar++;
+                    }
+                } elseif ($soal->tipe_soal === 'jodoh') {
+                    $benar = $soal->jawaban_benar;
+                    $isCorrect = true;
+                    if (is_array($benar) && is_array($jwbn)) {
+                        foreach ($benar as $key => $val) {
+                            if (!isset($jwbn[$key]) || strtolower(trim($jwbn[$key])) !== strtolower(trim($val))) {
+                                $isCorrect = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        $isCorrect = false;
+                    }
+                    if ($isCorrect) {
+                        $jumlahBenar++;
+                    }
+                }
             }
         }
 
         $nilai = ($soals->count() > 0) ? ($jumlahBenar / $soals->count()) * 100 : 0;
-        $isLulus = $nilai >= 80;
+        $isLulus = $nilai >= $ujian->passing_grade;
 
         HasilUjian::create([
             'siswa_id' => auth()->id(),
@@ -73,7 +127,6 @@ class SiswaUjianController extends Controller
             'completed_at' => now(),
         ]);
 
-        // Clear session
         Session::forget("ujian_{$ujian_id}_questions");
         Session::forget("ujian_{$ujian_id}_start");
 

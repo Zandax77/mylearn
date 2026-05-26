@@ -72,6 +72,16 @@
                                                 @else
                                                     <p class="text-xs text-gray-400 mt-1">Selesaikan semua materi untuk membuka kuis.</p>
                                                 @endif
+                                                @if($kuis->mulai_pada || $kuis->selesai_pada)
+                                                    <div class="text-xs mt-2 space-y-1 text-gray-500 dark:text-gray-400">
+                                                        @if($kuis->mulai_pada)
+                                                            <div>📅 Mulai: {{ $kuis->mulai_pada->translatedFormat('d F Y H:i') }}</div>
+                                                        @endif
+                                                        @if($kuis->selesai_pada)
+                                                            <div>⌛ Selesai: {{ $kuis->selesai_pada->translatedFormat('d F Y H:i') }}</div>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                             
                                             @if(!$bab->is_locked)
@@ -108,7 +118,17 @@
                 @if($uts)
                     <div class="bg-indigo-600 p-6 rounded-xl text-white shadow-lg">
                         <h3 class="text-xl font-bold mb-2">Uji Tengah Semester</h3>
-                        <p class="text-indigo-100 text-sm mb-6">Mencakup materi Bab 1 hingga pertengahan silabus.</p>
+                        <p class="text-indigo-100 text-sm mb-4">Mencakup materi Bab 1 hingga pertengahan silabus.</p>
+                        @if($uts->mulai_pada || $uts->selesai_pada)
+                            <div class="text-xs text-indigo-200 mb-4 space-y-1">
+                                @if($uts->mulai_pada)
+                                    <div>📅 Mulai: {{ $uts->mulai_pada->translatedFormat('d F Y H:i') }}</div>
+                                @endif
+                                @if($uts->selesai_pada)
+                                    <div>⌛ Selesai: {{ $uts->selesai_pada->translatedFormat('d F Y H:i') }}</div>
+                                @endif
+                            </div>
+                        @endif
                         <a href="{{ route('siswa.ujian.show', $uts->id) }}" class="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-indigo-50 transition">Ikuti UTS</a>
                     </div>
                 @endif
@@ -116,7 +136,17 @@
                 @if($uas)
                     <div class="bg-purple-600 p-6 rounded-xl text-white shadow-lg">
                         <h3 class="text-xl font-bold mb-2">Uji Akhir Semester</h3>
-                        <p class="text-purple-100 text-sm mb-6">Ujian akhir mencakup seluruh materi dalam satu semester.</p>
+                        <p class="text-purple-100 text-sm mb-4">Ujian akhir mencakup seluruh materi dalam satu semester.</p>
+                        @if($uas->mulai_pada || $uas->selesai_pada)
+                            <div class="text-xs text-purple-200 mb-4 space-y-1">
+                                @if($uas->mulai_pada)
+                                    <div>📅 Mulai: {{ $uas->mulai_pada->translatedFormat('d F Y H:i') }}</div>
+                                @endif
+                                @if($uas->selesai_pada)
+                                    <div>⌛ Selesai: {{ $uas->selesai_pada->translatedFormat('d F Y H:i') }}</div>
+                                @endif
+                            </div>
+                        @endif
                         <a href="{{ route('siswa.ujian.show', $uas->id) }}" class="inline-block bg-white text-purple-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-purple-50 transition">Ikuti UAS</a>
                     </div>
                 @endif

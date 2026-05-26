@@ -10,7 +10,7 @@
                     @csrf
                     <div>
                         <x-input-label for="pertanyaan" value="Pertanyaan" />
-                        <textarea id="pertanyaan" name="pertanyaan" rows="3" class="block w-full mt-1 rounded border-gray-300 dark:bg-gray-900 dark:text-white" required></textarea>
+                        <textarea id="pertanyaan" name="pertanyaan" rows="3" class="block w-full mt-1 rounded border-gray-300 bg-white text-gray-900 dark:bg-gray-900 dark:text-white" required></textarea>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -34,7 +34,7 @@
 
                     <div>
                         <x-input-label for="jawaban_benar" value="Kunci Jawaban Benar" />
-                        <select name="jawaban_benar" class="block w-full mt-1 rounded border-gray-300 dark:bg-gray-900 dark:text-white" required>
+                        <select name="jawaban_benar" class="block w-full mt-1 rounded border-gray-300 bg-white text-gray-900 dark:bg-gray-900 dark:text-white" required>
                             <option value="a">A</option>
                             <option value="b">B</option>
                             <option value="c">C</option>

@@ -61,6 +61,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('babs/{bab}', [App\Http\Controllers\BabController::class, 'update'])->name('babs.update');
         Route::delete('babs/{bab}', [App\Http\Controllers\BabController::class, 'destroy'])->name('babs.destroy');
 
+        Route::get('mapel/{mapel_id}/bank-soal', [App\Http\Controllers\BankSoalController::class, 'index'])->name('bank_soal.index');
+        Route::get('bank-soal/template', [App\Http\Controllers\BankSoalController::class, 'template'])->name('bank_soal.template');
+        Route::post('mapel/{mapel_id}/bank-soal/upload', [App\Http\Controllers\BankSoalController::class, 'upload'])->name('bank_soal.upload');
+        Route::delete('bank-soal/{id}', [App\Http\Controllers\BankSoalController::class, 'destroy'])->name('bank_soal.destroy');
+
         Route::get('mapel/{mapel_id}/progress', [App\Http\Controllers\SiswaProgressController::class, 'index'])->name('mapel.progress');
         Route::get('mapel/{mapel_id}/progress/{siswa_id}', [App\Http\Controllers\SiswaProgressController::class, 'show'])->name('mapel.progress.detail');
 
@@ -80,7 +85,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('ujian/{ujian_id}', [App\Http\Controllers\SiswaUjianController::class, 'show'])->name('ujian.show');
         Route::post('ujian/{ujian_id}/submit', [App\Http\Controllers\SiswaUjianController::class, 'submit'])->name('ujian.submit');
 
-        Route::get('materi/{id}/download', [App\Http\Controllers\MateriController::class, 'download'])->name('materi.download');
         Route::get('materi/{id}/view', [App\Http\Controllers\MateriController::class, 'viewMateri'])->name('materi.view');
 
         // Siswa hanya boleh melihat daftar tugas dan detail tugas (tidak bisa membuat/edit/hapus)
