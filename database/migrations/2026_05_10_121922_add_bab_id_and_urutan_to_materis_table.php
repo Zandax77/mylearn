@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('materis', function (Blueprint $table) {
-            $table->foreignId('bab_id')->nullable()->constrained('babs')->nullOnDelete();
-            $table->integer('urutan')->default(1);
-        });
+        if (\Schema::hasTable('babs')) {
+            Schema::table('materis', function (Blueprint $table) {
+                $table->foreignId('bab_id')->nullable()->constrained('babs')->nullOnDelete();
+                $table->integer('urutan')->default(1);
+            });
+        }
     }
 
     /**
