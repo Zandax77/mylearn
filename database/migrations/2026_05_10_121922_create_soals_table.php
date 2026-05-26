@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('soals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ujian_id')->constrained('ujians')->cascadeOnDelete();
+            $table->unsignedBigInteger('ujian_id');
             $table->text('pertanyaan');
             $table->string('opsi_a');
             $table->string('opsi_b');
@@ -22,6 +22,13 @@ return new class extends Migration
             $table->enum('jawaban_benar', ['a', 'b', 'c', 'd']);
             $table->timestamps();
         });
+
+        // Add foreign key only if ujians table exists
+        if (Schema::hasTable('ujians')) {
+            Schema::table('soals', function (Blueprint $table) {
+                $table->foreign('ujian_id')->references('id')->on('ujians')->cascadeOnDelete();
+            });
+        }
     }
 
     /**

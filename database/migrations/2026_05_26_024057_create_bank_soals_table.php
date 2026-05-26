@@ -14,13 +14,21 @@ return new class extends Migration
         Schema::create('bank_soals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mapel_id')->constrained('mapels')->cascadeOnDelete();
-            $table->foreignId('bab_id')->nullable()->constrained('babs')->cascadeOnDelete();
+            $table->unsignedBigInteger('bab_id')->nullable();
+
             $table->enum('tipe_soal', ['pg', 'bs', 'jodoh'])->default('pg');
             $table->text('pertanyaan');
             $table->json('opsi')->nullable();
             $table->json('jawaban_benar')->nullable(); // Can be string or JSON array depending on type
             $table->timestamps();
         });
+
+        // Add foreign key to babs table only if it exists
+        if (Schema::hasTable('babs')) {
+            Schema::table('bank_soals', function (Blueprint $table) {
+                $table->foreign('bab_id')->references('id')->on('babs')->cascadeOnDelete();
+            });
+        }
     }
 
     /**

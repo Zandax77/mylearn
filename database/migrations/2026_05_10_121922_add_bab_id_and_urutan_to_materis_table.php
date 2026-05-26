@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (\Schema::hasTable('babs')) {
+        if (Schema::hasTable('babs')) {
             Schema::table('materis', function (Blueprint $table) {
                 $table->foreignId('bab_id')->nullable()->constrained('babs')->nullOnDelete();
                 $table->integer('urutan')->default(1);
