@@ -14,12 +14,19 @@ return new class extends Migration
         Schema::create('hasil_ujians', function (Blueprint $table) {
             $table->id();
             $table->foreignId('siswa_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('ujian_id')->constrained('ujians')->cascadeOnDelete();
+            $table->unsignedBigInteger('ujian_id');
             $table->integer('nilai');
             $table->boolean('is_lulus');
             $table->timestamp('completed_at')->useCurrent();
             $table->timestamps();
         });
+
+        // Add foreign key to ujians table only if it exists
+        if (Schema::hasTable('ujians')) {
+            Schema::table('hasil_ujians', function (Blueprint $table) {
+                $table->foreign('ujian_id')->references('id')->on('ujians')->cascadeOnDelete();
+            });
+        }
     }
 
     /**
